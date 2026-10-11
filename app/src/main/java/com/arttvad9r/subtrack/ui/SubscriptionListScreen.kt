@@ -8,25 +8,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,23 +53,36 @@ fun SubscriptionListScreen(
     onOpen: (Long) -> Unit,
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "Подписки",
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                },
+                title = { Text("Подписки", style = MaterialTheme.typography.titleLarge) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
         },
-        floatingActionButton = {
+        bottomBar = {
             if (subscriptions.isNotEmpty()) {
-                FloatingActionButton(
-                    onClick = onAdd,
-                    modifier = Modifier.testTag(UiTags.ADD),
-                ) {
-                    Icon(Icons.Rounded.Add, contentDescription = "Добавить подписку")
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Box(
+                        Modifier
+                            .navigationBarsPadding()
+                            .padding(horizontal = Space.screen, vertical = Space.m),
+                    ) {
+                        Button(
+                            onClick = onAdd,
+                            shape = Radius.field,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 52.dp)
+                                .testTag(UiTags.ADD),
+                        ) {
+                            Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(Space.s))
+                            Text("Добавить подписку")
+                        }
+                    }
                 }
             }
         },
@@ -91,46 +105,45 @@ fun SubscriptionListScreen(
 @Composable
 private fun EmptySubscriptions(modifier: Modifier = Modifier, onAdd: () -> Unit) {
     Box(
-        modifier = modifier.fillMaxSize().padding(horizontal = 28.dp),
+        modifier = modifier.fillMaxSize().padding(horizontal = Space.screen),
         contentAlignment = Alignment.Center,
     ) {
         Column(
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Surface(
-                shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.secondaryContainer,
-            ) {
-                Box(
-                    modifier = Modifier.size(76.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Rounded.CreditCard,
-                        contentDescription = null,
-                        modifier = Modifier.size(34.dp),
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                }
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+                Icon(
+                    Icons.Outlined.CreditCard,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(20.dp).size(40.dp),
+                )
             }
             Text(
                 "Подписок пока нет",
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 24.dp),
             )
             Text(
-                "Добавь первую подписку — дату платежа и напоминание приложение возьмёт на себя.",
+                "Добавьте сервисы, за которые важно не забыть заплатить или отменить продление.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Space.m),
             )
             Button(
                 onClick = onAdd,
-                modifier = Modifier.padding(top = 6.dp).testTag(UiTags.ADD),
+                shape = Radius.field,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp)
+                    .heightIn(min = 52.dp)
+                    .testTag(UiTags.ADD),
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
+                Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(Space.s))
                 Text("Добавить подписку")
             }
         }
@@ -145,18 +158,20 @@ private fun SubscriptionList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 104.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(
+            start = Space.screen,
+            end = Space.screen,
+            top = Space.xs,
+            bottom = Space.l,
+        ),
+        verticalArrangement = Arrangement.spacedBy(Space.s),
     ) {
-        item {
-            MonthlySummary(subscriptions = subscriptions)
+        item("summary") {
+            MonthlySummary(subscriptions)
+            Spacer(Modifier.size(Space.xs))
         }
-
         items(subscriptions, key = { it.id }) { subscription ->
-            SubscriptionCard(
-                subscription = subscription,
-                onClick = { onOpen(subscription.id) },
-            )
+            SubscriptionCard(subscription) { onOpen(subscription.id) }
         }
     }
 }
@@ -169,7 +184,6 @@ private fun MonthlySummary(subscriptions: List<Subscription>) {
         }
         .groupBy({ it.first }, { it.second })
         .mapValues { (_, values) -> values.sum() }
-
     if (totals.isEmpty()) return
 
     val summary = totals.entries.joinToString(" + ") { (currency, amount) ->
@@ -180,32 +194,30 @@ private fun MonthlySummary(subscriptions: List<Subscription>) {
     }
     val activeCount = subscriptions.count { it.autoRenew }
 
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = Radius.card,
+        color = MaterialTheme.colorScheme.primaryContainer,
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            Text(
-                "Регулярные расходы",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f),
-            )
+        Column(Modifier.padding(Space.m)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Регулярные расходы",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Text(
+                    activeSubscriptionsText(activeCount),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
             Text(
                 (if (approximate) "≈ " else "") + summary + " / мес",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Text(
-                activeSubscriptionsText(activeCount),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f),
+                modifier = Modifier.padding(top = Space.s),
             )
         }
     }
@@ -216,59 +228,52 @@ private fun SubscriptionCard(subscription: Subscription, onClick: () -> Unit) {
     val expired = !subscription.autoRenew && subscription.date.isBefore(LocalDate.now())
     val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("ru-RU"))
 
-    Card(
+    Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
+        shape = Radius.card,
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Space.m, vertical = Space.s),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                modifier = Modifier.size(46.dp),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(44.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         subscription.name.firstOrNull()?.uppercase() ?: "•",
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
-
-            Spacer(Modifier.width(14.dp))
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
+            Spacer(Modifier.width(Space.m))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     subscription.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     "${relativeDateText(subscription)} · ${subscription.date.format(formatter)}",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = if (expired) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp),
                 )
             }
-
-            Spacer(Modifier.width(12.dp))
-
+            Spacer(Modifier.width(Space.s))
             Text(
                 priceWithPeriod(subscription),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
                 maxLines = 1,
             )
         }
@@ -285,7 +290,7 @@ private fun priceWithPeriod(subscription: Subscription): String {
 }
 
 private fun activeSubscriptionsText(count: Int): String = when {
-    count % 10 == 1 && count % 100 != 11 -> "$count активная подписка"
-    count % 10 in 2..4 && count % 100 !in 12..14 -> "$count активные подписки"
-    else -> "$count активных подписок"
+    count % 10 == 1 && count % 100 != 11 -> "$count активная"
+    count % 10 in 2..4 && count % 100 !in 12..14 -> "$count активные"
+    else -> "$count активных"
 }

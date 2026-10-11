@@ -1,6 +1,5 @@
 package com.arttvad9r.subtrack.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,28 +13,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Autorenew
-import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arttvad9r.subtrack.domain.BillingPeriod
@@ -71,16 +65,10 @@ fun SubscriptionDetailScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        subscription.name,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
+                title = { Text("Подписка", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Назад")
@@ -91,6 +79,9 @@ fun SubscriptionDetailScreen(
                         Icon(Icons.Rounded.Edit, contentDescription = "Изменить")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
         },
     ) { padding ->
@@ -99,73 +90,73 @@ fun SubscriptionDetailScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(horizontal = Space.screen)
+                .padding(bottom = 32.dp),
         ) {
-            Card(
+            Text(
+                subscription.name,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(top = Space.s),
+            )
+            Text(
+                formatPrice(subscription.priceMinor, subscription.currency),
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier.padding(top = Space.xs, bottom = Space.m),
+            )
+
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
+                shape = Radius.card,
+                color = MaterialTheme.colorScheme.primaryContainer,
             ) {
-                Column(
-                    modifier = Modifier.padding(22.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                Row(
+                    modifier = Modifier.padding(Space.m),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            if (subscription.autoRenew) "Следующий платёж" else "Окончание",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                        Text(
+                            subscription.date.format(dateFormatter),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(top = Space.xs),
+                        )
+                    }
                     Text(
-                        formatPrice(subscription.priceMinor, subscription.currency),
-                        style = MaterialTheme.typography.displaySmall,
+                        periodShort(subscription.billingPeriod),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.08f),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                Icons.Rounded.Event,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    if (subscription.autoRenew) "Следующий платёж" else "Окончание",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f),
-                                )
-                                Text(
-                                    subscription.date.format(dateFormatter),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
-                            }
-                        }
-                    }
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                ),
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(top = Space.l),
+                shape = Radius.card,
+                color = MaterialTheme.colorScheme.surface,
             ) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                Column {
                     DetailRow(
                         icon = Icons.Rounded.Repeat,
                         label = "Период",
                         value = periodText(subscription.billingPeriod),
                     )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = Space.m),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
                     DetailRow(
                         icon = Icons.Rounded.Autorenew,
                         label = "Автопродление",
                         value = if (subscription.autoRenew) "Включено" else "Выключено",
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = Space.m),
+                        color = MaterialTheme.colorScheme.outlineVariant,
                     )
                     DetailRow(
                         icon = Icons.Rounded.Notifications,
@@ -180,63 +171,58 @@ fun SubscriptionDetailScreen(
             }
 
             if (subscription.note.isNotBlank()) {
-                ContentCard(
+                InfoCard(
                     icon = Icons.AutoMirrored.Rounded.Notes,
                     title = "Комментарий",
-                    text = subscription.note,
+                    value = subscription.note,
+                    modifier = Modifier.padding(top = Space.s),
                 )
             }
 
             if (subscription.url.isNotBlank()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(top = Space.s),
+                    shape = Radius.card,
+                    color = MaterialTheme.colorScheme.surface,
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(Space.m),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconContainer(Icons.Rounded.Language)
-                        Spacer(Modifier.width(14.dp))
+                        Icon(
+                            Icons.Rounded.Language,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(Space.m))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 "Сайт",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
                                 subscription.url,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        TextButton(
-                            onClick = {
-                                runCatching { uriHandler.openUri(normalizedUrl(subscription.url)) }
-                            },
-                        ) {
+                        TextButton(onClick = {
+                            runCatching { uriHandler.openUri(normalizedUrl(subscription.url)) }
+                        }) {
                             Text("Открыть")
                         }
                     }
                 }
             }
 
-            OutlinedButton(
+            TextButton(
                 onClick = { confirmDelete = true },
-                modifier = Modifier.fillMaxWidth().testTag(UiTags.DELETE),
-                shape = MaterialTheme.shapes.medium,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error,
-                ),
+                modifier = Modifier.padding(top = Space.m).testTag(UiTags.DELETE),
             ) {
-                Icon(Icons.Rounded.DeleteOutline, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Удалить подписку")
+                Text("Удалить подписку", color = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -244,8 +230,10 @@ fun SubscriptionDetailScreen(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Удалить подписку?") },
-            text = { Text("${subscription.name} будет удалена вместе с напоминанием.") },
+            shape = Radius.card,
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = { Text("Удалить подписку?", style = MaterialTheme.typography.titleLarge) },
+            text = { Text("«${subscription.name}» будет удалена вместе с напоминанием.") },
             confirmButton = {
                 TextButton(onClick = onDelete) {
                     Text("Удалить", color = MaterialTheme.colorScheme.error)
@@ -263,63 +251,61 @@ fun SubscriptionDetailScreen(
 @Composable
 private fun DetailRow(icon: ImageVector, label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(Space.m),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconContainer(icon)
-        Spacer(Modifier.width(14.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(value, style = MaterialTheme.typography.bodyLarge)
-        }
+        Icon(
+            icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(Space.m))
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
 @Composable
-private fun ContentCard(icon: ImageVector, title: String, text: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
+private fun InfoCard(
+    icon: ImageVector,
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = Radius.card,
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(Space.m),
             verticalAlignment = Alignment.Top,
         ) {
-            IconContainer(icon)
-            Spacer(Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(text, style = MaterialTheme.typography.bodyLarge)
-            }
-        }
-    }
-}
-
-@Composable
-private fun IconContainer(icon: ImageVector) {
-    Surface(
-        modifier = Modifier.size(40.dp),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-    ) {
-        androidx.compose.foundation.layout.Box(contentAlignment = Alignment.Center) {
             Icon(
                 icon,
                 contentDescription = null,
-                modifier = Modifier.size(21.dp),
-                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Spacer(Modifier.width(Space.m))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = Space.xs),
+                )
+            }
         }
     }
 }
@@ -328,4 +314,10 @@ private fun periodText(period: BillingPeriod): String = when (period) {
     BillingPeriod.NONE -> "Без повторения"
     BillingPeriod.MONTHLY -> "Каждый месяц"
     BillingPeriod.YEARLY -> "Каждый год"
+}
+
+private fun periodShort(period: BillingPeriod): String = when (period) {
+    BillingPeriod.NONE -> "разово"
+    BillingPeriod.MONTHLY -> "каждый месяц"
+    BillingPeriod.YEARLY -> "каждый год"
 }
