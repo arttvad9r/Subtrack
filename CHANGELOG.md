@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+- Refreshed the Material 3 visual system with denser typography and rounded surfaces.
+- Reworked the subscription list into summary and subscription cards with a contextual FAB.
+- Reorganized add/edit into compact Basic, Payment, Reminder and Additional sections.
+- Reworked subscription details into a price/date hero card and compact settings rows.
+- Added reminder preset chips while keeping a custom day value available.
+
 ### Added
 - Initial Android application and repository structure.
 - Local Room storage for multiple subscriptions.
