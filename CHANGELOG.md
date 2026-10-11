@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Changed
-- Replaced the legacy bell launcher icon with a paper/moss adaptive icon built from the subscription-card, renewal and calendar artwork; added round launcher support.
+- Refined the adaptive launcher icon to a simple paper-white subscription-card + renewal mark on the Rutina-style moss background; added Android 13+ monochrome themed-icon support.
 - Aligned the visual system with the companion `Rutina` app: paper/moss palette, compact typography, 16/12 dp radii and matching light/dark surfaces.
 - Replaced Android dynamic color with the same fixed light/dark color roles used by `Rutina`.
 - Refreshed the Material 3 visual system with denser typography and rounded surfaces.
