@@ -266,7 +266,6 @@ private fun SubscriptionCard(subscription: Subscription, onClick: () -> Unit) {
                     color = if (expired) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 2.dp),
                 )
             }
             Spacer(Modifier.width(Space.s))
