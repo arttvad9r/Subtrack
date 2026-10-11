@@ -15,7 +15,7 @@ Subtrack is a small native Android app for personal subscription tracking.
 - Single `app` module.
 - Room is the source of truth.
 - Manual dependency injection through `AppContainer`; no Hilt/Koin.
-- `AlarmManager` handles day-level reminders. Exact-alarm permission is intentionally avoided.
+- `AlarmManager` handles day-level reminders. Exact-alarm permission is intentionally avoided. Reconcile alarms after reboot and time/timezone changes.
 - Money is integer minor units, never `Double` persistence.
 - Dates are `LocalDate` semantics.
 
@@ -26,7 +26,9 @@ Before considering a normal change complete, run:
 ```bash
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 export ANDROID_HOME=$HOME/Android/Sdk
-./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
+# With an emulator/device connected:
+./gradlew :app:connectedDebugAndroidTest
 ```
 
 ## Repository hygiene

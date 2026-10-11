@@ -51,7 +51,7 @@ Supported MVP billing periods:
 - monthly;
 - yearly.
 
-For an auto-renewing recurring subscription whose stored date is in the past, repository reconciliation rolls the date forward until it is today or in the future. Month-end behavior uses `LocalDate.plusMonths`, so dates remain valid across different month lengths.
+For an auto-renewing recurring subscription whose stored date is in the past, repository reconciliation rolls the date forward until it is today or in the future. Month-end entries preserve month-end semantics, so `31 Jan -> 28 Feb -> 31 Mar`; yearly leap-day entries similarly return to the final day of February in leap years.
 
 ## Reminder delivery
 
@@ -61,7 +61,7 @@ Each alarm is scheduled for about 09:00 local time on `date - reminderDays`.
 
 The PendingIntent identity is derived from the subscription id, so saving a subscription replaces its previous alarm and deleting it can cancel the alarm.
 
-`BootReceiver` reloads active subscriptions after `BOOT_COMPLETED` and recreates alarms.
+`BootReceiver` reloads active subscriptions after `BOOT_COMPLETED` and recreates alarms. `TimeChangeReceiver` does the same after system time/timezone changes so the intended reminder remains near 09:00 local time.
 
 ## Recurring reminders while the app stays closed
 
@@ -76,7 +76,7 @@ The ViewModel exposes the Room list as `StateFlow` and performs mutations in `vi
 ## Error strategy
 
 - Invalid form input is blocked before persistence.
-- Malformed URLs are stored as text but only opened when Android can resolve them.
+- Optional website URLs are validated before persistence; bare hosts such as `example.com` are normalized to HTTPS when opened.
 - Scheduling failure must not lose subscription data.
 - Receiver work uses `goAsync()` and a bounded coroutine instead of blocking the main thread.
 
@@ -87,4 +87,4 @@ Unit tests cover deterministic domain rules first:
 - reminder date calculation;
 - price parsing/formatting.
 
-Android-specific alarm and notification behavior can later receive instrumentation tests if the MVP grows.
+Android instrumentation covers Room CRUD, the full Compose add/edit/delete flow, DatePicker interaction and activity recreation. Runtime adb smoke tests cover notification permission behavior, force-stop persistence, reboot restoration and timezone rescheduling.

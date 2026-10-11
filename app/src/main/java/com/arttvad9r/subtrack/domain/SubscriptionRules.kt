@@ -2,8 +2,10 @@ package com.arttvad9r.subtrack.domain
 
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 fun rollForwardDate(
@@ -15,19 +17,30 @@ fun rollForwardDate(
 
     var result = date
     while (result.isBefore(today)) {
-        result = when (period) {
-            BillingPeriod.NONE -> result
-            BillingPeriod.MONTHLY -> result.plusMonths(1)
-            BillingPeriod.YEARLY -> result.plusYears(1)
-        }
+        result = nextPeriodDate(result, period)
     }
     return result
 }
 
 fun nextPeriodDate(date: LocalDate, period: BillingPeriod): LocalDate = when (period) {
     BillingPeriod.NONE -> date
-    BillingPeriod.MONTHLY -> date.plusMonths(1)
-    BillingPeriod.YEARLY -> date.plusYears(1)
+    BillingPeriod.MONTHLY -> advanceKeepingEndOfMonth(date, months = 1)
+    BillingPeriod.YEARLY -> advanceKeepingEndOfMonth(date, years = 1)
+}
+
+private fun advanceKeepingEndOfMonth(
+    date: LocalDate,
+    months: Long = 0,
+    years: Long = 0,
+): LocalDate {
+    val sourceMonth = YearMonth.from(date)
+    val targetMonth = sourceMonth.plusMonths(months).plusYears(years)
+    val targetDay = if (date.dayOfMonth == sourceMonth.lengthOfMonth()) {
+        targetMonth.lengthOfMonth()
+    } else {
+        minOf(date.dayOfMonth, targetMonth.lengthOfMonth())
+    }
+    return targetMonth.atDay(targetDay)
 }
 
 fun nextFutureReminderTargetDate(
@@ -82,7 +95,7 @@ fun formatPrice(priceMinor: Long, currency: String): String {
         "EUR" -> "€"
         else -> currency.uppercase()
     }
-    return if (symbol.length == 1 || symbol == "₽") "$amount $symbol" else "$amount $symbol"
+    return "$amount $symbol"
 }
 
 fun monthlyEquivalentMinor(subscription: Subscription): Long? {
@@ -98,4 +111,10 @@ fun normalizedUrl(raw: String): String {
     val value = raw.trim()
     if (value.isEmpty()) return value
     return if ("://" in value) value else "https://$value"
+}
+
+fun isValidWebUrl(raw: String): Boolean {
+    if (raw.isBlank()) return false
+    val uri = runCatching { URI(normalizedUrl(raw)) }.getOrNull() ?: return false
+    return uri.scheme?.lowercase() in setOf("http", "https") && !uri.host.isNullOrBlank()
 }

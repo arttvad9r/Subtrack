@@ -55,7 +55,7 @@ class ReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val date = subscription.date.format(
-            DateTimeFormatter.ofPattern("d MMMM", Locale.getDefault()),
+            DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("ru-RU")),
         )
         val action = if (subscription.autoRenew) "платёж" else "окончание"
         val text = "${formatPrice(subscription.priceMinor, subscription.currency)} · $action $date"

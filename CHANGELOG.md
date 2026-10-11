@@ -11,9 +11,22 @@
 - Android 13+ notification permission flow.
 - Optional local note and website URL.
 - Per-currency monthly cost summary.
-- Unit and Room instrumentation tests.
+- Unit, Room and full Compose CRUD instrumentation tests.
+- Debug-only notification smoke trigger, excluded from release builds.
 - Product, architecture, ADR, roadmap and verification documentation.
 - GitHub Actions verification workflow.
+
+### Changed
+- Subscription form now uses a reliable clickable DatePicker control and a collapsed optional section.
+- Website input is validated before save.
+- Reminder alarms are rescheduled after timezone/time changes.
+
+### Fixed
+- Month-end recurrence now preserves month-end semantics (`31 Jan -> 28 Feb -> 31 Mar`).
+- Yearly leap-day recurrence returns to the last day of February in leap years.
+- Missing a reminder window no longer leaves recurring subscriptions without a future alarm.
+- Fixed the `Следующий платёд` typo in the UI.
+- Russian date labels now consistently use Russian month names regardless of the device locale.
 
 ### Privacy
 - No backend, account, analytics, advertising SDK or network permission.

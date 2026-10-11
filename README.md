@@ -10,13 +10,13 @@ Minimal offline Android subscription tracker built with Kotlin, Jetpack Compose 
 - distinguishes auto-renewal from fixed expiration;
 - keeps an optional note and service URL;
 - sends a local reminder before the relevant date;
-- restores reminders after device reboot.
+- restores reminders after device reboot and timezone/time changes.
 
 No account, backend, analytics or advertising SDK is required.
 
 ## Status
 
-`0.1.0` — functional MVP implementation. See [`docs/verification/2026-10-11-mvp.md`](docs/verification/2026-10-11-mvp.md).
+`0.1.0` — functional MVP with hardening and end-to-end Android verification. See [`docs/verification/2026-10-11-mvp.md`](docs/verification/2026-10-11-mvp.md).
 
 Product requirements: [`docs/SPEC.md`](docs/SPEC.md)
 

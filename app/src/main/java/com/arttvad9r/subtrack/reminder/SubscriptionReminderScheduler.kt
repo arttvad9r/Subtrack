@@ -4,7 +4,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.arttvad9r.subtrack.domain.BillingPeriod
 import com.arttvad9r.subtrack.domain.Subscription
+import com.arttvad9r.subtrack.domain.nextFutureReminderTargetDate
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -20,17 +22,21 @@ class SubscriptionReminderScheduler(context: Context) {
             return
         }
 
-        val desired = subscription.date
-            .minusDays(subscription.reminderDaysBefore.toLong())
-            .atTime(LocalTime.of(9, 0))
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-
+        val desired = reminderTriggerMillis(subscription)
         val now = System.currentTimeMillis()
-        if (desired <= now && !catchUpIfPast) return
-        val triggerAtMillis = if (desired <= now) now + 2_000L else desired
+        if (desired <= now && !catchUpIfPast) {
+            if (subscription.autoRenew && subscription.billingPeriod != BillingPeriod.NONE) {
+                val futureTarget = nextFutureReminderTargetDate(
+                    currentTargetDate = subscription.date,
+                    period = subscription.billingPeriod,
+                    reminderDaysBefore = subscription.reminderDaysBefore,
+                )
+                schedule(subscription.copy(date = futureTarget), catchUpIfPast = false)
+            }
+            return
+        }
 
+        val triggerAtMillis = if (desired <= now) now + 2_000L else desired
         alarmManager.setAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             triggerAtMillis,
@@ -49,6 +55,13 @@ class SubscriptionReminderScheduler(context: Context) {
         alarmManager.cancel(pendingIntent)
         pendingIntent.cancel()
     }
+
+    private fun reminderTriggerMillis(subscription: Subscription): Long = subscription.date
+        .minusDays(subscription.reminderDaysBefore.toLong())
+        .atTime(LocalTime.of(9, 0))
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
 
     private fun pendingIntent(subscription: Subscription, updateFlag: Int): PendingIntent {
         val intent = Intent(appContext, ReminderReceiver::class.java).apply {

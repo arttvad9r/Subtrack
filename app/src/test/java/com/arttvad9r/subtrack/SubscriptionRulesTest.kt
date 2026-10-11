@@ -2,8 +2,10 @@ package com.arttvad9r.subtrack
 
 import com.arttvad9r.subtrack.domain.BillingPeriod
 import com.arttvad9r.subtrack.domain.Subscription
+import com.arttvad9r.subtrack.domain.isValidWebUrl
 import com.arttvad9r.subtrack.domain.monthlyEquivalentMinor
 import com.arttvad9r.subtrack.domain.nextFutureReminderTargetDate
+import com.arttvad9r.subtrack.domain.nextPeriodDate
 import com.arttvad9r.subtrack.domain.normalized
 import com.arttvad9r.subtrack.domain.parsePriceMinor
 import com.arttvad9r.subtrack.domain.reminderDate
@@ -11,7 +13,9 @@ import com.arttvad9r.subtrack.domain.rollForwardDate
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SubscriptionRulesTest {
@@ -32,6 +36,26 @@ class SubscriptionRulesTest {
             today = LocalDate.of(2026, 10, 11),
         )
         assertEquals(LocalDate.of(2026, 10, 15), result)
+    }
+
+    @Test
+    fun `month end billing stays at month end`() {
+        val february = nextPeriodDate(LocalDate.of(2027, 1, 31), BillingPeriod.MONTHLY)
+        val march = nextPeriodDate(february, BillingPeriod.MONTHLY)
+        assertEquals(LocalDate.of(2027, 2, 28), february)
+        assertEquals(LocalDate.of(2027, 3, 31), march)
+    }
+
+    @Test
+    fun `leap day yearly billing returns to leap day`() {
+        val nonLeap = nextPeriodDate(LocalDate.of(2024, 2, 29), BillingPeriod.YEARLY)
+        val leapAgain = rollForwardDate(
+            date = nonLeap,
+            period = BillingPeriod.YEARLY,
+            today = LocalDate.of(2028, 2, 29),
+        )
+        assertEquals(LocalDate.of(2025, 2, 28), nonLeap)
+        assertEquals(LocalDate.of(2028, 2, 29), leapAgain)
     }
 
     @Test
@@ -71,6 +95,15 @@ class SubscriptionRulesTest {
     fun `yearly price is converted to approximate monthly minor units`() {
         val subscription = sample(priceMinor = 4_800_00L, period = BillingPeriod.YEARLY)
         assertEquals(40_000L, monthlyEquivalentMinor(subscription))
+    }
+
+    @Test
+    fun `web url accepts host with or without scheme`() {
+        assertTrue(isValidWebUrl("example.com"))
+        assertTrue(isValidWebUrl("https://example.com/account"))
+        assertFalse(isValidWebUrl("not a url"))
+        assertFalse(isValidWebUrl("ftp://example.com"))
+        assertFalse(isValidWebUrl(""))
     }
 
     private fun sample(
