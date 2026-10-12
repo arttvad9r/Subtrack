@@ -24,12 +24,11 @@ Subtrack is a small native Android app for personal subscription tracking.
 Before considering a normal change complete, run:
 
 ```bash
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-export ANDROID_HOME=$HOME/Android/Sdk
 ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
-# With an emulator/device connected:
-./gradlew :app:connectedDebugAndroidTest
+ANDROID_SERIAL=<serial> ./gradlew :app:connectedDebugAndroidTest
 ```
+
+Get the emulator serial with the global `android-emu` skill; never use the owner's physical phone.
 
 ## Repository hygiene
 
