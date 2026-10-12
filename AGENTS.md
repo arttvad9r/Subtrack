@@ -35,3 +35,8 @@ Get the emulator serial with the global `android-emu` skill; never use the owner
 Do not commit `local.properties`, `.gradle`, `.idea`, build outputs, APK/AAB files or signing material.
 
 Prefer small focused dependencies and small files. Add architecture layers only when current complexity actually requires them.
+
+## Git
+- `main` is the working branch and must always build and pass checks.
+- Work in `feat/<name>` / `fix/<name>` from `main`; several branches may run in parallel. Merge verified work into `main`, then delete the branch.
+- Push only with the owner's explicit permission.
